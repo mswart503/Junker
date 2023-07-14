@@ -1,0 +1,280 @@
+# This is a sample Python script.
+
+# Press Shift+F10 to execute it or replace it with your code.
+# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+
+import pygame
+import pygame_menu
+import pygame_widgets
+import pygame_gui
+from pygame_widgets.textbox import TextBox
+import junker
+import os
+import pygame.freetype
+import random
+from junker import Scenario, Player, JunkinMap
+
+run = True
+main_map = pygame.image.load('Assets/Junker Initial Map.png') # 929 x 615
+wasteland = pygame.image.load('Assets/wasteland2.jpg')
+startsville = pygame.image.load('Assets/startsville2.jpg')
+map_width = main_map.get_width()
+map_height = main_map.get_height()
+clock = pygame.time.Clock()
+screen_width = 1300
+screen_height = 900
+surface_x = 100
+surface_y = 100
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (surface_x, surface_y)
+card_width = 100
+card_height = 150
+menu_theme = pygame_menu.themes.THEME_ORANGE
+widget_font = pygame_menu.font.FONT_MUNRO
+title_font = pygame_menu.font.FONT_8BIT
+
+menu_theme.widget_font = widget_font
+menu_theme.title_font = title_font
+menu_theme.title_font_size = 27
+#menu_theme.widget_alignment = pygame_menu.locals.ALIGN_LEFT
+player_name = "You"
+
+
+def print_hi(name):
+    # Use a breakpoint in the code line below to debug your script.
+    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+
+
+# Press the green button in the gutter to run the script.
+if __name__ == '__main__':
+    print_hi('PyCharm')
+
+
+pygame.init()
+pygame.display.set_caption('Junker Legacy')
+surface = pygame.display.set_mode((1300, 900))
+
+# below is the process for using the pygame_gui, not sure I'm going to.
+#manager = pygame_gui.UIManager(())
+
+def set_difficulty(value, difficulty):
+    # Do the job here !
+    pass
+
+
+def main_menu():
+    start_theme = menu_theme.copy()
+    start_theme.widget_alignment = pygame_menu.locals.ALIGN_CENTER
+    menu = pygame_menu.Menu('Welcome', 400, 300,
+                            theme=start_theme)
+
+    test_name = menu.add.text_input('Name :', default=' Jimmy P')
+    # menu.add.selector('Difficulty :', [('Hard', 1), ('Easy', 2)], onchange=set_difficulty)
+    menu.add.button('Play', start_the_game, test_name.get_value())
+    menu.add.button('Quit', pygame_menu.events.EXIT)
+    menu.mainloop(surface)
+
+
+def go_to_town(game_surface, contract_list):
+    def display_details(contract): #ADDING THIS TO THE SAME MENU AS CHOOSING FROM. WOULD BE BETTER TO CREATE SEPARATE MENU AND EACH LINE BE NEW LABEL.
+                                    # Could have remaining screen taken up by second menu, so more detail and art can be added to contracts later.
+        new_menu = pygame_menu.Menu("Contracts", game_surface.get_width()-300, game_surface.get_height(), theme=menu_theme)
+        new_menu.set_absolute_position(300,0)
+        new_menu.add.label("Title: " + contract.title)
+        new_menu.add.label("Offered by: " + contract.contractor.name + " The " + contract.contractor.profession)
+        new_menu.add.label("Needed: ")
+        for need in contract.needed:
+            new_menu.add.label(str(need[1]) + " " + need[0])
+        new_menu.add.label("Reward: ")
+
+        for reward in contract.reward:
+            new_menu.add.label(str(reward[1]) + " " + reward[0])
+
+        new_menu.add.label(contract.description, wordwrap=True)
+        new_menu.draw(game_surface)
+        pygame.display.flip()
+
+    def contracts():
+
+        global looking_at_contracts
+        looking_at_contracts = True
+        def back_out():
+            global looking_at_contracts
+            looking_at_contracts = False
+        contract_title, contract_offered_by, reward1, reward_amt1, description = "", "", "", 0, ""
+        display_pack = [contract_title, contract_offered_by, reward1, reward_amt1, description]
+
+        contract_menu = pygame_menu.Menu("Contracts", 300, game_surface.get_height(), theme=menu_theme)
+        contract_menu.set_absolute_position(0, 0)
+
+        for contract in contract_list:
+            contract_menu.add.button(contract.title, display_details, contract)
+        contract_menu.add.button("Back", back_out)
+
+
+
+        while looking_at_contracts: # CREATING THE CONTRACT DISPLAY SCREEN
+            clock.tick(60)
+            events = pygame.event.get()
+            for event in events:
+                if event.type == pygame.QUIT:
+                    looking_at_contracts = False
+            contract_menu.draw(game_surface)
+            contract_menu.update(events)
+            pygame.display.flip()
+
+
+
+    currently_townin = True
+    town_menu = pygame_menu.Menu('Startsville', game_surface.get_width(), 300,
+                            theme=menu_theme)
+    town_menu.set_absolute_position(0, game_surface.get_height()-300)
+    current_contracts = contract_list
+    town_menu.add.button("Browse Contracts",contracts)
+
+
+    while currently_townin:
+         clock.tick(60)
+         events = pygame.event.get()
+         for event in events:
+             if event.type == pygame.QUIT:
+                 currently_townin = False
+
+         game_surface.fill((0, 0, 0))
+         game_surface.blit(startsville, (0, 0))
+         town_menu.draw(game_surface)
+         town_menu.update(events)
+         pygame.display.flip()
+
+def contract_set(contract_list): #for now returns contract list, in future will determine who needs what and what they can offer.
+    return contract_list
+
+def hit_the_road():
+    pass
+
+def junkin(game_surface, scenario, player):
+    currently_junkin = False
+    choosing_junk_loc = True
+    scen_menu = scenario.menu
+    junk_map = JunkinMap(player, game_surface)
+   # for buttons in scenario.menu_buttons:
+
+    while choosing_junk_loc:
+        clock.tick(60)
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                choosing_junk_loc = False
+        junk_map.map.draw(game_surface)
+        junk_map.map.update(events)
+        pygame.display.flip()
+
+    while currently_junkin:
+        clock.tick(60)
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                currently_junkin = False
+        game_surface.fill((0, 0, 0))
+        game_surface.blit(wasteland, (0, 0))
+        scen_menu.draw(game_surface)
+        scen_menu.update(events)
+        pygame.display.flip()
+
+
+def scenario_set(scenario_list):
+    scen_numbers = 1
+    scen_list = scenario_list
+
+    first_check = random.randint(0, 0)
+
+    next_scen = scen_list[first_check]
+
+    return next_scen
+
+
+def setup_scenarios(player, surface): #Creates a complete scenario list for all possible scenarios
+    scen_list = junker.create_Scenarios(player, surface)
+    return scen_list
+
+def start_the_game(player_name):
+    turn_start = True
+    run_round = True
+    turn_num = 1
+    weather = "Sunny"
+    player = Player()
+    game_surface = pygame.display.set_mode((screen_width, screen_height))
+    scenario_list = setup_scenarios(player, game_surface)
+    next_scen = scenario_set(scenario_list)
+
+    contract_list = junker.create_Contracts()
+    current_contracts = contract_set(contract_list)
+
+    turn_list = TextBox(game_surface, 100, 100, 800, 80, fontSize=50,
+                        borderColour=(0, 0, 0), textColour=(100, 99, 98))
+    turn_list.text = 'Day %s                Weather: %s' % (str(turn_num), weather)
+
+    while turn_start:
+        clock.tick(60) / 1000.0
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                turn_start = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                turn_start = False
+
+        turn_list.draw()
+        pygame.display.update()
+
+
+    ranking_list = pygame_menu.Menu('Junker Legacy', screen_width-map_width, 300,
+                                theme=menu_theme)
+    ranking_list.set_absolute_position(0, 0)
+    ranked_names = 'TC Tyler\n' \
+                   'Scrappy\n'\
+                   '%s\n' \
+                   'Tommy Tanks\n' % player_name
+    ranking_list.add.label("Rankings", max_char=-1, font_size=30)
+    ranking_list.add.label(ranked_names, max_char=-1, font_size=20)
+
+    actions_list = pygame_menu.Menu("Actions", ranking_list.get_width(), map_height-ranking_list.get_height(), theme=menu_theme)
+    actions_list.set_absolute_position(0, ranking_list.get_height())
+    actions_list.add.button("Go to Town", go_to_town, game_surface, current_contracts)
+    actions_list.add.button("Hit the road", hit_the_road, game_surface)
+    actions_list.add.button("Get Junkin' & end turn", junkin, game_surface, next_scen, player)
+
+
+
+
+    #card_test = junker.Card("Go to Town", "Perform 1 action in the town you're in",card_width, card_height, game_surface.get_width()-map_width,0)
+
+    while run_round:
+        junkin_options = []
+        time_delta = clock.tick(60)/1000.0
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                run_round = False
+
+        game_surface.blit(main_map, (game_surface.get_width()-map_width, 0))
+        ranking_list.update(events)
+        ranking_list.draw(game_surface)
+        actions_list.update(events)
+        actions_list.draw(game_surface)
+        #card_test.draw(game_surface)
+        pygame.display.update()
+
+    pass
+
+
+
+main_menu()
+
+#while run:
+#    menu.mainloop(surface)
+
+#    for event in pygame.event.get():
+#        if event.type == pygame.QUIT:
+#            run = False
+
+
+# See PyCharm help at https://www.jetbrains.com/help/pycharm/
