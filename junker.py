@@ -53,7 +53,7 @@ class Player:
         self.junk = 0
 
 class Character:
-    def __init__(self, name, profession, trust = 0):
+    def __init__(self, name, profession, trust=0):
         self.name = name
         self.profession = profession
         self.trust = trust

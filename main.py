@@ -53,8 +53,8 @@ pygame.init()
 pygame.display.set_caption('Junker Legacy')
 surface = pygame.display.set_mode((1300, 900))
 
-# below is the process for using the pygame_gui, not sure I'm going to.
-#manager = pygame_gui.UIManager(())
+# below is the process for using the pygame_gui
+manager = pygame_gui.UIManager((1300, 900))
 
 def set_difficulty(value, difficulty):
     # Do the job here !
@@ -62,6 +62,22 @@ def set_difficulty(value, difficulty):
 
 
 def main_menu():
+    main_menu_running = True
+    game_surface = pygame.display.set_mode((screen_width, screen_height))
+    menu_width, menu_height = 400, 300
+    play_rect = pygame.Rect(0, -20, 100, 20)
+    quit_rect = pygame.Rect(0, 20, 100, 20)
+    menu_rect = pygame.Rect((game_surface.get_width()-menu_width)/2, (game_surface.get_height()-menu_height)/2, menu_width, menu_height)
+    menu_window = pygame_gui.elements.UIWindow(menu_rect, manager=manager)
+    play_button = pygame_gui.elements.UIButton(relative_rect=play_rect, text="Play",
+                                               manager=manager, container=menu_window,
+                                               anchors={'center': 'center'}, object_id='#play_button')
+    play_button = pygame_gui.elements.UIButton(relative_rect=quit_rect, text="Quit",
+                                               manager=manager, container=menu_window,
+                                               anchors={'center': 'center'}, object_id='quit_button')
+
+    '''
+    # Old code with Pygame_menu functionality.
     start_theme = menu_theme.copy()
     start_theme.widget_alignment = pygame_menu.locals.ALIGN_CENTER
     menu = pygame_menu.Menu('Welcome', 400, 300,
@@ -72,9 +88,30 @@ def main_menu():
     menu.add.button('Play', start_the_game, test_name.get_value())
     menu.add.button('Quit', pygame_menu.events.EXIT)
     menu.mainloop(surface)
+    '''
+    while main_menu_running:
+        time_delta = clock.tick(60)/1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                main_menu_running = False
+            if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                if event.ui_element == play_button:
+                    start_the_game("Jimmy P")
+                    print("At least this worked")
+
+            manager.process_events(event)
+
+        manager.update(time_delta)
+        game_surface.fill((0,0,0))
+        manager.draw_ui(game_surface)
+        pygame.display.update()
 
 
 def go_to_town(game_surface, contract_list):
+
+    def add_contract_to_player(contract):
+        pass
+
     def display_details(contract): #ADDING THIS TO THE SAME MENU AS CHOOSING FROM. WOULD BE BETTER TO CREATE SEPARATE MENU AND EACH LINE BE NEW LABEL.
                                     # Could have remaining screen taken up by second menu, so more detail and art can be added to contracts later.
         new_menu = pygame_menu.Menu("Contracts", game_surface.get_width()-300, game_surface.get_height(), theme=menu_theme)
@@ -90,16 +127,18 @@ def go_to_town(game_surface, contract_list):
             new_menu.add.label(str(reward[1]) + " " + reward[0])
 
         new_menu.add.label(contract.description, wordwrap=True)
+        new_menu.add.button("Accept", add_contract_to_player, contract)
         new_menu.draw(game_surface)
         pygame.display.flip()
 
     def contracts():
 
-        global looking_at_contracts
         looking_at_contracts = True
-        def back_out():
-            global looking_at_contracts
-            looking_at_contracts = False
+        def back_out(button):
+            #break
+            #button.set_onreturn(False)
+            pass
+
         contract_title, contract_offered_by, reward1, reward_amt1, description = "", "", "", 0, ""
         display_pack = [contract_title, contract_offered_by, reward1, reward_amt1, description]
 
@@ -108,8 +147,7 @@ def go_to_town(game_surface, contract_list):
 
         for contract in contract_list:
             contract_menu.add.button(contract.title, display_details, contract)
-        contract_menu.add.button("Back", back_out)
-
+        contract_menu.add.button("Back", back_out, button_id="back")
 
 
         while looking_at_contracts: # CREATING THE CONTRACT DISPLAY SCREEN
@@ -118,18 +156,31 @@ def go_to_town(game_surface, contract_list):
             for event in events:
                 if event.type == pygame.QUIT:
                     looking_at_contracts = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pass
+            #if contract_menu.get_widget("back").apply() == False:
+            #    looking_at_contracts = False
             contract_menu.draw(game_surface)
             contract_menu.update(events)
+
             pygame.display.flip()
 
 
 
+
+    global currently_townin
     currently_townin = True
+    def break_out():
+        global currently_townin
+        currently_townin = False
     town_menu = pygame_menu.Menu('Startsville', game_surface.get_width(), 300,
                             theme=menu_theme)
     town_menu.set_absolute_position(0, game_surface.get_height()-300)
     current_contracts = contract_list
-    town_menu.add.button("Browse Contracts",contracts)
+    town_menu.add.button("Browse Contracts", contracts)
+    town_menu.add.button("Back to Map", break_out)
+
+
 
 
     while currently_townin:
@@ -196,12 +247,29 @@ def setup_scenarios(player, surface): #Creates a complete scenario list for all 
     scen_list = junker.create_Scenarios(player, surface)
     return scen_list
 
+def look_at_contracts():
+    for contract in contract_list:
+        contract_menu.add.button(contract.title, display_details, contract)
+    contract_menu.add.button("Back", back_out)
+
+    while looking_at_contracts:  # CREATING THE CONTRACT DISPLAY SCREEN
+        clock.tick(60)
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                looking_at_contracts = False
+        contract_menu.draw(game_surface)
+        contract_menu.update(events)
+        pygame.display.flip()
+
 def start_the_game(player_name):
     turn_start = True
     run_round = True
     turn_num = 1
     weather = "Sunny"
+    global player
     player = Player()
+    player.name = player_name
     game_surface = pygame.display.set_mode((screen_width, screen_height))
     scenario_list = setup_scenarios(player, game_surface)
     next_scen = scenario_set(scenario_list)
@@ -242,6 +310,13 @@ def start_the_game(player_name):
     actions_list.add.button("Hit the road", hit_the_road, game_surface)
     actions_list.add.button("Get Junkin' & end turn", junkin, game_surface, next_scen, player)
 
+    player_summary = pygame_menu.Menu(player_name, game_surface.get_width(), game_surface.get_height()-main_map.get_height(), columns=3, rows=2)
+    #player_summary.add.button("Inventory", look_at_inventory)
+    #player_summary.add.button("Contracts", look_at_contracts)
+    #player_summary.add.button("Workers", look_at_workers)
+    #.add.frame_h(game_surface.get_width()/2,player_summary.get_height()-20)
+
+
 
 
 
@@ -254,7 +329,7 @@ def start_the_game(player_name):
         for event in events:
             if event.type == pygame.QUIT:
                 run_round = False
-
+        game_surface.fill((0, 0, 0))
         game_surface.blit(main_map, (game_surface.get_width()-map_width, 0))
         ranking_list.update(events)
         ranking_list.draw(game_surface)
