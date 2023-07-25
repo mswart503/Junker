@@ -68,11 +68,11 @@ def main_menu():
     play_rect = pygame.Rect(0, -20, 100, 20)
     quit_rect = pygame.Rect(0, 20, 100, 20)
     menu_rect = pygame.Rect((game_surface.get_width()-menu_width)/2, (game_surface.get_height()-menu_height)/2, menu_width, menu_height)
-    menu_window = pygame_gui.elements.UIWindow(menu_rect, manager=manager)
+    menu_window = pygame_gui.elements.UIWindow(menu_rect, manager=manager,)
     play_button = pygame_gui.elements.UIButton(relative_rect=play_rect, text="Play",
                                                manager=manager, container=menu_window,
                                                anchors={'center': 'center'}, object_id='#play_button')
-    play_button = pygame_gui.elements.UIButton(relative_rect=quit_rect, text="Quit",
+    quit_button = pygame_gui.elements.UIButton(relative_rect=quit_rect, text="Quit",
                                                manager=manager, container=menu_window,
                                                anchors={'center': 'center'}, object_id='quit_button')
 
@@ -96,13 +96,15 @@ def main_menu():
                 main_menu_running = False
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == play_button:
-                    start_the_game("Jimmy P")
+                    start_the_game("Jimmy P", ["TC Tyler", "Scrappy", "Jimmy P", "Tommy Tanks"])
                     print("At least this worked")
+                if event.ui_element == quit_button:
+                    main_menu_running = False
 
             manager.process_events(event)
 
         manager.update(time_delta)
-        game_surface.fill((0,0,0))
+        game_surface.fill((0, 0, 0))
         manager.draw_ui(game_surface)
         pygame.display.update()
 
@@ -115,7 +117,7 @@ def go_to_town(game_surface, contract_list):
     def display_details(contract): #ADDING THIS TO THE SAME MENU AS CHOOSING FROM. WOULD BE BETTER TO CREATE SEPARATE MENU AND EACH LINE BE NEW LABEL.
                                     # Could have remaining screen taken up by second menu, so more detail and art can be added to contracts later.
         new_menu = pygame_menu.Menu("Contracts", game_surface.get_width()-300, game_surface.get_height(), theme=menu_theme)
-        new_menu.set_absolute_position(300,0)
+        new_menu.set_absolute_position(300, 0)
         new_menu.add.label("Title: " + contract.title)
         new_menu.add.label("Offered by: " + contract.contractor.name + " The " + contract.contractor.profession)
         new_menu.add.label("Needed: ")
@@ -262,7 +264,7 @@ def look_at_contracts():
         contract_menu.update(events)
         pygame.display.flip()
 
-def start_the_game(player_name):
+def start_the_game(player_name,ranked_list):
     turn_start = True
     run_round = True
     turn_num = 1
@@ -281,6 +283,7 @@ def start_the_game(player_name):
                         borderColour=(0, 0, 0), textColour=(100, 99, 98))
     turn_list.text = 'Day %s                Weather: %s' % (str(turn_num), weather)
 
+
     while turn_start:
         clock.tick(60) / 1000.0
         events = pygame.event.get()
@@ -293,6 +296,52 @@ def start_the_game(player_name):
         turn_list.draw()
         pygame.display.update()
 
+    start_manager = pygame_gui.UIManager((1300, 900))
+    name1_rect = pygame.Rect(0, -40, screen_width-map_width-50, 300)
+    name2_rect = pygame.Rect(0, name1_rect.y+20, screen_width-map_width-50, 300)
+    name3_rect = pygame.Rect(0, name2_rect.y+20, screen_width-map_width-50, 300)
+    name4_rect = pygame.Rect(0, name3_rect.y+20, screen_width-map_width-50, 300)
+
+    rank_width, rank_height = screen_width-map_width, 300
+    #play_rect = pygame.Rect(0, -20, 100, 20)
+    #quit_rect = pygame.Rect(0, 20, 100, 20)
+    rank_rect = pygame.Rect(0, 0, rank_width, rank_height)
+    ranking_list_window = pygame_gui.elements.UIWindow(rank_rect, manager=start_manager, window_display_title="Ranking List")
+    name1 = pygame_gui.elements.UILabel(name1_rect, ranked_list[0], manager=start_manager, container=ranking_list_window,
+                                        anchors={'center': 'center'})
+    name2 = pygame_gui.elements.UILabel(name2_rect, ranked_list[1], manager=start_manager, container=ranking_list_window,
+                                        anchors={'center': 'center'})
+    name3 = pygame_gui.elements.UILabel(name3_rect, ranked_list[2], manager=start_manager, container=ranking_list_window,
+                                        anchors={'center': 'center'})
+    name4 = pygame_gui.elements.UILabel(name4_rect, ranked_list[3], manager=start_manager, container=ranking_list_window,
+                                        anchors={'center': 'center'})
+    #ranking_list = pygame_gui.elements.UILabel(rank_rect, ranked_names, manager=start_manager, container=ranking_list_window,
+    #                                           anchors={'center': 'center'}, object_id='#ranking_list')
+    ranking_test = True
+    while ranking_test:
+        time_delta = clock.tick(60)/1000.0
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                ranking_test = False
+            if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                pass
+
+            start_manager.process_events(event)
+
+        start_manager.update(time_delta)
+        game_surface.fill((0, 0, 0))
+        start_manager.draw_ui(game_surface)
+
+        pygame.display.update()
+
+    '''
+    play_button = pygame_gui.elements.UIButton(relative_rect=play_rect, text="Play",
+                                               manager=manager, container=menu_window,
+                                               anchors={'center': 'center'}, object_id='#play_button')
+    quit_button = pygame_gui.elements.UIButton(relative_rect=quit_rect, text="Quit",
+                                               manager=manager, container=menu_window,
+                                               anchors={'center': 'center'}, object_id='quit_button')
+    '''
 
     ranking_list = pygame_menu.Menu('Junker Legacy', screen_width-map_width, 300,
                                 theme=menu_theme)
