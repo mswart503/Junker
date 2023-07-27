@@ -16,7 +16,7 @@ from junker import Scenario, Player, JunkinMap
 
 run = True
 main_map = pygame.image.load('Assets/Junker Initial Map.png') # 929 x 615
-wasteland = pygame.image.load('Assets/wasteland2.jpg')
+wasteland = pygame.image.load('Assets/BKgr2.png')
 startsville = pygame.image.load('Assets/startsville2.jpg')
 map_width = main_map.get_width()
 map_height = main_map.get_height()
@@ -302,10 +302,16 @@ def start_the_game(player_name,ranked_list):
     name3_rect = pygame.Rect(0, name2_rect.y+20, screen_width-map_width-50, 300)
     name4_rect = pygame.Rect(0, name3_rect.y+20, screen_width-map_width-50, 300)
 
-    rank_width, rank_height = screen_width-map_width, 300
+    rank_width, rank_height, action_height = screen_width-map_width, 300, 400
     #play_rect = pygame.Rect(0, -20, 100, 20)
     #quit_rect = pygame.Rect(0, 20, 100, 20)
     rank_rect = pygame.Rect(0, 0, rank_width, rank_height)
+    action_rect = pygame.Rect(0, rank_rect.y+rank_height, rank_width, action_height)
+    button_width = 200
+    button_height = 50
+    go_to_town_rect = pygame.Rect(0, -((action_height-240)/2), button_width, button_height)
+    junkin_rect = pygame.Rect(0,go_to_town_rect.y+80, button_width, button_height)
+    hit_the_road_rect = pygame.Rect(0,junkin_rect.y+80, button_width, button_height)
     ranking_list_window = pygame_gui.elements.UIWindow(rank_rect, manager=start_manager, window_display_title="Ranking List")
     name1 = pygame_gui.elements.UILabel(name1_rect, ranked_list[0], manager=start_manager, container=ranking_list_window,
                                         anchors={'center': 'center'})
@@ -317,6 +323,18 @@ def start_the_game(player_name,ranked_list):
                                         anchors={'center': 'center'})
     #ranking_list = pygame_gui.elements.UILabel(rank_rect, ranked_names, manager=start_manager, container=ranking_list_window,
     #                                           anchors={'center': 'center'}, object_id='#ranking_list')
+
+    action_list_window = pygame_gui.elements.UIWindow(action_rect, manager=start_manager, window_display_title="Action List")
+    go_to_town_button = pygame_gui.elements.UIButton(relative_rect=go_to_town_rect, text="Go To Town",
+                                               manager=start_manager, container=action_list_window,
+                                               anchors={'center': 'center'}, object_id='#go_to_town_button')
+    junkin_button = pygame_gui.elements.UIButton(relative_rect=junkin_rect, text="Get Junkin'",
+                                               manager=start_manager, container=action_list_window,
+                                               anchors={'center': 'center'}, object_id='#junkin_button')
+    hit_the_road_button = pygame_gui.elements.UIButton(relative_rect=hit_the_road_rect, text="Hit The Road",
+                                               manager=start_manager, container=action_list_window,
+                                               anchors={'center': 'center'}, object_id='#hit_the_road_button')
+
     ranking_test = True
     while ranking_test:
         time_delta = clock.tick(60)/1000.0
@@ -330,6 +348,8 @@ def start_the_game(player_name,ranked_list):
 
         start_manager.update(time_delta)
         game_surface.fill((0, 0, 0))
+        game_surface.blit(wasteland, (game_surface.get_width()-wasteland.get_width(), 0))
+
         start_manager.draw_ui(game_surface)
 
         pygame.display.update()
@@ -342,7 +362,7 @@ def start_the_game(player_name,ranked_list):
                                                manager=manager, container=menu_window,
                                                anchors={'center': 'center'}, object_id='quit_button')
     '''
-
+    '''
     ranking_list = pygame_menu.Menu('Junker Legacy', screen_width-map_width, 300,
                                 theme=menu_theme)
     ranking_list.set_absolute_position(0, 0)
@@ -352,6 +372,8 @@ def start_the_game(player_name,ranked_list):
                    'Tommy Tanks\n' % player_name
     ranking_list.add.label("Rankings", max_char=-1, font_size=30)
     ranking_list.add.label(ranked_names, max_char=-1, font_size=20)
+    '''
+
 
     actions_list = pygame_menu.Menu("Actions", ranking_list.get_width(), map_height-ranking_list.get_height(), theme=menu_theme)
     actions_list.set_absolute_position(0, ranking_list.get_height())
