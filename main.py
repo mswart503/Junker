@@ -110,12 +110,16 @@ def main_menu():
 
 
 def go_to_town(game_surface, contract_list):
+    screen_width, screen_height = 1300, 900
+    town_manager = pygame_gui.UIManager((screen_width, screen_height))
 
     def add_contract_to_player(contract):
         pass
 
     def display_details(contract): #ADDING THIS TO THE SAME MENU AS CHOOSING FROM. WOULD BE BETTER TO CREATE SEPARATE MENU AND EACH LINE BE NEW LABEL.
                                     # Could have remaining screen taken up by second menu, so more detail and art can be added to contracts later.
+
+
         new_menu = pygame_menu.Menu("Contracts", game_surface.get_width()-300, game_surface.get_height(), theme=menu_theme)
         new_menu.set_absolute_position(300, 0)
         new_menu.add.label("Title: " + contract.title)
@@ -168,23 +172,53 @@ def go_to_town(game_surface, contract_list):
             pygame.display.flip()
 
 
+    '''
+    rank_rect = pygame.Rect(0, 0, rank_width, rank_height)
+    action_rect = pygame.Rect(0, rank_rect.y+rank_height, rank_width, action_height)
+    button_width = 200
+    button_height = 50
+    go_to_town_rect = pygame.Rect(0, -((action_height-240)/2), button_width, button_height)
+    junkin_rect = pygame.Rect(0, go_to_town_rect.y+80, button_width, button_height)
+    hit_the_road_rect = pygame.Rect(0, junkin_rect.y+80, button_width, button_height)
+    ranking_list_window = pygame_gui.elements.UIWindow(rank_rect, manager=start_manager, window_display_title="Ranking List")
+    name1 = pygame_gui.elements.UILabel(name1_rect, ranked_list[0], manager=start_manager, container=ranking_list_window,
+                                        anchors={'center': 'center'})
+    name2 = pygame_gui.elements.UILabel(name2_rect, ranked_list[1], manager=start_manager, container=ranking_list_window,
+                                        anchors={'center': 'center'})
+    name3 = pygame_gui.elements.UILabel(name3_rect, ranked_list[2], manager=start_manager, container=ranking_list_window,
+                                        anchors={'center': 'center'})
+    name4 = pygame_gui.elements.UILabel(name4_rect, ranked_list[3], manager=start_manager, container=ranking_list_window,
+                                        anchors={'center': 'center'})
+    #ranking_list = pygame_gui.elements.UILabel(rank_rect, ranked_names, manager=start_manager, container=ranking_list_window,
+    #                                           anchors={'center': 'center'}, object_id='#ranking_list')
+    
+    action_list_window = pygame_gui.elements.UIWindow(action_rect, manager=start_manager, window_display_title="Action List")
+    go_to_town_button = pygame_gui.elements.UIButton(relative_rect=go_to_town_rect, text="Go To Town",
+                                               manager=start_manager, container=action_list_window,
+                                               anchors={'center': 'center'}, object_id='#go_to_town_button')
+    '''
+    town_menu_rect = pygame.Rect(0, screen_height-300, screen_width, 300)
+    contracts_button_rect = pygame.Rect(-100, 50, 300, 200)
+    back_to_map_button_rect = contracts_button_rect
+    back_to_map_button_rect.x = back_to_map_button_rect.x + back_to_map_button_rect.width + 100
 
-
-    global currently_townin
-    currently_townin = True
-    def break_out():
-        global currently_townin
-        currently_townin = False
-    town_menu = pygame_menu.Menu('Startsville', game_surface.get_width(), 300,
-                            theme=menu_theme)
-    town_menu.set_absolute_position(0, game_surface.get_height()-300)
+    town_menu_window = pygame_gui.elements.UIWindow(town_menu_rect, manager=town_manager, window_display_title="Town Menu")
+    contracts_button = pygame_gui.elements.UIButton(relative_rect=contracts_button_rect, text="Browse Contracts",
+                                               manager=town_manager, container=town_menu_window,
+                                               anchors={'center': 'center'}, object_id='#contracts_button')
+    back_to_map_button = pygame_gui.elements.UIButton(relative_rect=contracts_button_rect, text="Browse Contracts",
+                                               manager=town_manager, container=town_menu_window,
+                                               anchors={'center': 'center'}, object_id='#contracts_button')
+    #pygame_menu.Menu('Startsville', game_surface.get_width(), 300,
+    #                        theme=menu_theme)
+    #town_menu.set_absolute_position(0, game_surface.get_height()-300)
     current_contracts = contract_list
-    town_menu.add.button("Browse Contracts", contracts)
-    town_menu.add.button("Back to Map", break_out)
+    #town_menu.add.button("Browse Contracts", contracts)
+    #town_menu.add.button("Back to Map", break_out)
 
 
 
-
+    currently_townin = True
     while currently_townin:
          clock.tick(60)
          events = pygame.event.get()
@@ -310,8 +344,8 @@ def start_the_game(player_name,ranked_list):
     button_width = 200
     button_height = 50
     go_to_town_rect = pygame.Rect(0, -((action_height-240)/2), button_width, button_height)
-    junkin_rect = pygame.Rect(0,go_to_town_rect.y+80, button_width, button_height)
-    hit_the_road_rect = pygame.Rect(0,junkin_rect.y+80, button_width, button_height)
+    junkin_rect = pygame.Rect(0, go_to_town_rect.y+80, button_width, button_height)
+    hit_the_road_rect = pygame.Rect(0, junkin_rect.y+80, button_width, button_height)
     ranking_list_window = pygame_gui.elements.UIWindow(rank_rect, manager=start_manager, window_display_title="Ranking List")
     name1 = pygame_gui.elements.UILabel(name1_rect, ranked_list[0], manager=start_manager, container=ranking_list_window,
                                         anchors={'center': 'center'})
