@@ -335,15 +335,19 @@ def start_the_game(player_name,ranked_list):
                                                manager=start_manager, container=action_list_window,
                                                anchors={'center': 'center'}, object_id='#hit_the_road_button')
 
-    ranking_test = True
-    while ranking_test:
+    start_menu = True
+    while start_menu:
         time_delta = clock.tick(60)/1000.0
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                ranking_test = False
+                start_menu = False
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                pass
-
+                if event.ui_element == go_to_town_button:
+                    go_to_town(game_surface, contract_list)
+                if event.ui_element == junkin_button:
+                    junkin(game_surface, next_scen, player)
+                if event.ui_element == hit_the_road_button:
+                    hit_the_road()
             start_manager.process_events(event)
 
         start_manager.update(time_delta)
@@ -374,7 +378,7 @@ def start_the_game(player_name,ranked_list):
     ranking_list.add.label(ranked_names, max_char=-1, font_size=20)
     '''
 
-
+    '''
     actions_list = pygame_menu.Menu("Actions", ranking_list.get_width(), map_height-ranking_list.get_height(), theme=menu_theme)
     actions_list.set_absolute_position(0, ranking_list.get_height())
     actions_list.add.button("Go to Town", go_to_town, game_surface, current_contracts)
@@ -410,7 +414,7 @@ def start_the_game(player_name,ranked_list):
         pygame.display.update()
 
     pass
-
+'''
 
 
 main_menu()
