@@ -33,6 +33,7 @@ widget_font = pygame_menu.font.FONT_MUNRO
 title_font = pygame_menu.font.FONT_8BIT
 action_button_width = 200
 action_button_height = 50
+toolbar_rect = pygame.Rect(0, screen_height - (screen_height/7), screen_width, screen_height/7)
 menu_theme.widget_font = widget_font
 menu_theme.title_font = title_font
 menu_theme.title_font_size = 27
@@ -209,19 +210,28 @@ def go_to_town(game_surface, contract_list, ranking_list_window, action_rect, cu
 
     currently_townin = True
     while currently_townin:
-         time_delta = clock.tick(60) / 1000.0
-         events = pygame.event.get()
-         for event in events:
-             if event.type == pygame.QUIT:
-                 currently_townin = False
+        time_delta = clock.tick(60) / 1000.0
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.QUIT:
+                currently_townin = False
+            if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                if event.ui_element == back_to_map_button:
+                    currently_townin = False
+                if event.ui_element == contracts_button:
+                    contracts()
+                if event.ui_element == hire_button:
+                    print('hire_button pressed')
+                if event.ui_element == shop_button:
+                    pass
+            town_manager.process_events(event)
 
+        town_manager.update(time_delta)
+        game_surface.fill((0, 0, 0))
+        game_surface.blit(startsville, (0, 0))
+        town_manager.draw_ui(game_surface)
 
-         town_manager.update(time_delta)
-         game_surface.fill((0, 0, 0))
-         game_surface.blit(startsville, (0, 0))
-         town_manager.draw_ui(game_surface)
-
-         pygame.display.update()
+        pygame.display.update()
 
 def contract_set(contract_list): #for now returns contract list, in future will determine who needs what and what they can offer.
     return contract_list
@@ -289,6 +299,17 @@ def look_at_contracts():
         contract_menu.update(events)
         pygame.display.flip()
 
+def build_toolbar(toolbar, cur_manager):
+    inventory_button_rect = pygame.Rect(0, 0, 200, toolbar_rect.height-59)
+    staff_button_rect = pygame.Rect(inventory_button_rect.width, 0, inventory_button_rect.width, inventory_button_rect.height)
+    char_button_rect = pygame.Rect(staff_button_rect.width*2, 0, inventory_button_rect.width, inventory_button_rect.height)
+    inventory_button = pygame_gui.elements.UIButton(inventory_button_rect,"Inventory",manager=cur_manager,container=toolbar,
+                                                    tool_tip_text="Access your Items")
+    staff_button = pygame_gui.elements.UIButton(staff_button_rect,"Staff",manager=cur_manager,container=toolbar,
+                                                    tool_tip_text="Manage your Staff")
+    char_button = pygame_gui.elements.UIButton(char_button_rect,"Character",manager=cur_manager,container=toolbar,
+                                                    tool_tip_text="Look at your stats")
+    return toolbar, cur_manager
 def start_the_game(player_name,ranked_list):
     turn_start = True
     run_round = True
@@ -347,8 +368,6 @@ def start_the_game(player_name,ranked_list):
     name4 = pygame_gui.elements.UILabel(name4_rect, ranked_list[3], manager=start_manager, container=ranking_list_window,
                                         anchors={'center': 'center'})
     current_ranks = [name1, name2, name3, name4]
-    #ranking_list = pygame_gui.elements.UILabel(rank_rect, ranked_names, manager=start_manager, container=ranking_list_window,
-    #                                           anchors={'center': 'center'}, object_id='#ranking_list')
 
     action_list_window = pygame_gui.elements.UIWindow(action_rect, manager=start_manager, window_display_title="Action List")
     go_to_town_button = pygame_gui.elements.UIButton(relative_rect=go_to_town_rect, text="Go To Town",
@@ -360,6 +379,11 @@ def start_the_game(player_name,ranked_list):
     hit_the_road_button = pygame_gui.elements.UIButton(relative_rect=hit_the_road_rect, text="Hit The Road",
                                                manager=start_manager, container=action_list_window,
                                                anchors={'center': 'center'}, object_id='#hit_the_road_button')
+
+    # Adds bottom screen menu for inventory, staff, character, and scrap access
+
+    toolbar = pygame_gui.elements.UIWindow(toolbar_rect, manager=start_manager, window_display_title="Toolbar")
+    toolbar, start_manager = build_toolbar(toolbar, start_manager)
 
     start_menu = True
     while start_menu:
