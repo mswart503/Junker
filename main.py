@@ -111,10 +111,10 @@ def main_menu():
         pygame.display.update()
 
 
-def go_to_town(game_surface, contract_list, ranking_list_window, action_rect, current_ranks, current_rank_rects):
+def go_to_town(game_surface, contract_list, ranking_list_window, action_rect, current_ranks, current_rank_rects, toolbar):
     screen_width, screen_height = 1300, 900
     town_manager = pygame_gui.UIManager((screen_width, screen_height))
-
+    town_toolbar = build_toolbar(toolbar, town_manager)
     def add_contract_to_player(contract):
         pass
 
@@ -139,39 +139,53 @@ def go_to_town(game_surface, contract_list, ranking_list_window, action_rect, cu
         new_menu.draw(game_surface)
         pygame.display.flip()
 
-    def contracts():
+    def contracts(toolbar):
 
         looking_at_contracts = True
-        def back_out(button):
-            #break
-            #button.set_onreturn(False)
-            pass
+        contract_manager = pygame_gui.UIManager((1300, 900))
+        toolbar = build_toolbar(toolbar, contract_manager)
+        #def back_out(button):
+        #    #break
+        #    #button.set_onreturn(False)
+        #    pass
 
-        contract_title, contract_offered_by, reward1, reward_amt1, description = "", "", "", 0, ""
-        display_pack = [contract_title, contract_offered_by, reward1, reward_amt1, description]
+        #contract_title, contract_offered_by, reward1, reward_amt1, description = "", "", "", 0, ""
+        #display_pack = [contract_title, contract_offered_by, reward1, reward_amt1, description]
 
-        contract_menu = pygame_menu.Menu("Contracts", 300, game_surface.get_height(), theme=menu_theme)
-        contract_menu.set_absolute_position(0, 0)
-
+        contract_menu_rect = pygame.Rect(0, 0, 300, game_surface.get_height()-toolbar_rect.height)
+        contract_menu = pygame_gui.elements.UIWindow(contract_menu_rect, manager=contract_manager,window_display_title="Contracts",
+                                                     draggable=False)
+        start_contract_rect = pygame.Rect(0,0, contract_menu_rect.width-20, 100)
+        #contract_menu = pygame_menu.Menu("Contracts", 300, game_surface.get_height(), theme=menu_theme)
+        #contract_menu.set_absolute_position(0, 0)
+        counter = 0
         for contract in contract_list:
-            contract_menu.add.button(contract.title, display_details, contract)
-        contract_menu.add.button("Back", back_out, button_id="back")
+            cur_contract_Rect = start_contract_rect
+            cur_contract_Rect.y = start_contract_rect.height*counter # puts the button down the number of times the counter has increased by
+            counter = counter+1
+            cur_contract = pygame_gui.elements.UIButton(cur_contract_Rect,contract.title,manager=contract_manager,container=contract_menu)
+            #contract_menu.add.button(contract.title, display_details, contract)
+        back_out_rect = cur_contract_Rect
+        back_out_rect.y = back_out_rect.y+back_out_rect.height
+        back_out_button = pygame_gui.elements.UIButton(back_out_rect, "Back", manager=contract_manager, container=contract_menu)
+        #contract_menu.add.button("Back", back_out, button_id="back")
 
 
         while looking_at_contracts: # CREATING THE CONTRACT DISPLAY SCREEN
-            clock.tick(60)
+            time_delta = clock.tick(60)/1000.0
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
                     looking_at_contracts = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     pass
-            #if contract_menu.get_widget("back").apply() == False:
-            #    looking_at_contracts = False
-            contract_menu.draw(game_surface)
-            contract_menu.update(events)
+                contract_manager.process_events(event)
 
-            pygame.display.flip()
+            contract_manager.update(time_delta)
+            game_surface.fill((0, 0, 0))
+
+            contract_manager.draw_ui(game_surface)
+            pygame.display.update()
 
 
 
@@ -219,7 +233,7 @@ def go_to_town(game_surface, contract_list, ranking_list_window, action_rect, cu
                 if event.ui_element == back_to_map_button:
                     currently_townin = False
                 if event.ui_element == contracts_button:
-                    contracts()
+                    contracts(toolbar)
                 if event.ui_element == hire_button:
                     print('hire_button pressed')
                 if event.ui_element == shop_button:
@@ -300,6 +314,7 @@ def look_at_contracts():
         pygame.display.flip()
 
 def build_toolbar(toolbar, cur_manager):
+    toolbar = pygame_gui.elements.UIWindow(toolbar_rect, cur_manager, window_display_title="Toolbar",draggable=False)
     inventory_button_rect = pygame.Rect(0, 0, 200, toolbar_rect.height-59)
     staff_button_rect = pygame.Rect(inventory_button_rect.width, 0, inventory_button_rect.width, inventory_button_rect.height)
     char_button_rect = pygame.Rect(staff_button_rect.width*2, 0, inventory_button_rect.width, inventory_button_rect.height)
@@ -393,7 +408,7 @@ def start_the_game(player_name,ranked_list):
                 start_menu = False
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == go_to_town_button:
-                    go_to_town(game_surface, contract_list, ranking_list_window, action_rect, current_ranks, current_rank_rects)
+                    go_to_town(game_surface, contract_list, ranking_list_window, action_rect, current_ranks, current_rank_rects, toolbar)
                 if event.ui_element == junkin_button:
                     junkin(game_surface, next_scen, player)
                 if event.ui_element == hit_the_road_button:
