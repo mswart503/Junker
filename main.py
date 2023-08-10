@@ -118,32 +118,51 @@ def go_to_town(game_surface, contract_list, ranking_list_window, action_rect, cu
     def add_contract_to_player(contract):
         pass
 
-    def display_details(contract, town_manager): #ADDING THIS TO THE SAME MENU AS CHOOSING FROM. WOULD BE BETTER TO CREATE SEPARATE MENU AND EACH LINE BE NEW LABEL.
+    def display_details(contract, contract_manager): #ADDING THIS TO THE SAME MENU AS CHOOSING FROM. WOULD BE BETTER TO CREATE SEPARATE MENU AND EACH LINE BE NEW LABEL.
                                     # Could have remaining screen taken up by second menu, so more detail and art can be added to contracts later.
         details_window_rect = pygame.Rect(action_rect.width, 0, game_surface.get_width()-action_rect.width, game_surface.get_height()-toolbar_rect.height)
-        details_window = pygame_gui.elements.UIWindow(details_window_rect, town_manager, window_display_title="Contract Details",
+        details_window = pygame_gui.elements.UIWindow(details_window_rect, contract_manager, window_display_title="Contract Details",
                                                       resizable=False)
-        title_rect = pygame.Rect(0, 0, details_window_rect.width, 200)
-        title = pygame_gui.elements.UILabel(title_rect, "Title: " + contract.title, manager=town_manager, container=details_window)
+        title_rect = pygame.Rect(0, 20, details_window_rect.width, 50)
+        title = pygame_gui.elements.UILabel(title_rect, "Title: " + contract.title, manager=contract_manager, container=details_window)
         offered_by_rect = title_rect.copy()
         offered_by_rect.y = offered_by_rect.y+offered_by_rect.height
+        offered_by = pygame_gui.elements.UILabel(offered_by_rect, "Offered by: "+contract.contractor.name+" The "+contract.contractor.profession
+                                                 , manager=contract_manager, container=details_window)
         needed_rect = offered_by_rect.copy()
-        needed_rect.y = needed_rect.y + needed_rect.height
+        needed_rect.y = needed_rect.y + needed_rect.height +50
+        needed = pygame_gui.elements.UILabel(needed_rect,"Needed:",manager=contract_manager, container=details_window)
+
         next_rect = needed_rect.copy()
+        next_rect.y = next_rect.y + next_rect.height
+        need1, need2, need3, need4, need5 = ("1", 1), ("2", 2), ("3", 3), ("4", 4), ("5", 5)
+        need_list = [need1, need2, need3, need4, need5]
+        count = 0
+        for need in contract.needed:
+            need_list[count] = contract.needed[count]
+            count += 1
+        count2 = 0
+        while count > 0:
+            need_list[count2] = pygame_gui.elements.UILabel(next_rect, need_list[count2][0]+" Amount needed: " +str(need_list[count2][1]), manager=contract_manager,
+                                                            container=details_window)
+            count2 += 1
+            count -= 1
+            next_rect.y = next_rect.y + next_rect.height
 
-        #for need in contract.needed:
+        description_rect = next_rect.copy()
+        description_rect.y = next_rect.y + next_rect.height + 50
+
+        description = pygame_gui.elements.UILabel(description_rect, contract.description, manager=contract_manager,
+                                                  container=details_window)
+
+        accept_rect = pygame.Rect(0, details_window_rect.height-150, 200, 100)
+        accept_button = pygame_gui.elements.UIButton(accept_rect, "Accept Contract", manager=contract_manager,
+                                                     container=details_window, anchors={'center': 'bottom'})
 
 
-
-        #contract_title = pygame_gui.elements.UILabel()
-        town_manager.draw_ui(game_surface)
-        pygame.display.update()
-        return town_manager
+        return contract_manager
 
         '''
-        new_menu = pygame_menu.Menu("Contracts", game_surface.get_width()-300, game_surface.get_height(), theme=menu_theme)
-        new_menu.set_absolute_position(300, 0)
-        new_menu.add.label("Title: " + contract.title)
         new_menu.add.label("Offered by: " + contract.contractor.name + " The " + contract.contractor.profession)
         new_menu.add.label("Needed: ")
         for need in contract.needed:
@@ -202,7 +221,8 @@ def go_to_town(game_surface, contract_list, ranking_list_window, action_rect, cu
                     for contract in contract_list:
                         if event.ui_element.text == contract.title:
                             contract_manager = display_details(contract, contract_manager)
-
+                    if event.ui_element == back_out_button:
+                        looking_at_contracts = False
                 contract_manager.process_events(event)
 
             contract_manager.update(time_delta)

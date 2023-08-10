@@ -148,7 +148,7 @@ def create_Contracts():
             "Building a new tool shed",
             Character("Randy", "Carpenter"),
             [("Metal", 100), ("Wood", 50)],
-            [("Gold", 300)],
+            [("Scrap", 300)],
             "With the Startsville growth projects i've had a lot more work lately. I need "
             "materials to build a new tool shed that my employees can use."
         )
