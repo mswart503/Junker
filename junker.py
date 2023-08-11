@@ -138,6 +138,21 @@ class Contract:
         self.needed = needed
         self.reward = reward
         self.description = description
+        self.lines = 0
+
+        if len(description) > 20:
+            description_return = ["", "", "", "", ""]
+            description_lines = description.split()
+            count = 0
+            line = 0
+            for word in description_lines:
+                description_return[line] = description_return[line]+ word + " "
+                count += 1
+                if count == 10:
+                    count = 0
+                    line += 1
+            self.description = description_return
+            self.lines = line
 
 
 def create_Contracts():

@@ -151,9 +151,19 @@ def go_to_town(game_surface, contract_list, ranking_list_window, action_rect, cu
 
         description_rect = next_rect.copy()
         description_rect.y = next_rect.y + next_rect.height + 50
-
-        description = pygame_gui.elements.UILabel(description_rect, contract.description, manager=contract_manager,
-                                                  container=details_window)
+        line1, line2, line3, line4, line5 = "", "", "", "", ""
+        description_list = [line1, line2, line3, line4, line5]
+        count = 0
+        for line in contract.description:
+            description_list[count] = contract.description[count]
+            count += 1
+        count2 = 0
+        while count > 0:
+            description_list[count2] = pygame_gui.elements.UILabel(description_rect, contract.description[count2],
+                                                                   manager=contract_manager, container=details_window)
+            count2 += 1
+            count -= 1
+            description_rect.y = description_rect.y + description_rect.height
 
         accept_rect = pygame.Rect(0, details_window_rect.height-150, 200, 100)
         accept_button = pygame_gui.elements.UIButton(accept_rect, "Accept Contract", manager=contract_manager,
