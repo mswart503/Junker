@@ -50,7 +50,8 @@ class Player:
         self.gold = 0
         self.metal = 0
         self.wood = 0
-        self.junk = 0
+        self.scrap = 0
+        self.contract_list = []
 
 class Character:
     def __init__(self, name, profession, trust=0):

@@ -15,6 +15,7 @@ import random
 from junker import Scenario, Player, JunkinMap
 
 run = True
+player = junker.Player()
 main_map = pygame.image.load('Assets/Junker Initial Map.png') # 929 x 615
 wasteland = pygame.image.load('Assets/BKgr2.png')
 startsville = pygame.image.load('Assets/startsville2.jpg')
@@ -38,7 +39,7 @@ menu_theme.widget_font = widget_font
 menu_theme.title_font = title_font
 menu_theme.title_font_size = 27
 #menu_theme.widget_alignment = pygame_menu.locals.ALIGN_LEFT
-player_name = "You"
+player.name = "You"
 
 
 def print_hi(name):
@@ -54,8 +55,6 @@ if __name__ == '__main__':
 pygame.init()
 pygame.display.set_caption('Junker Legacy')
 surface = pygame.display.set_mode((1300, 900))
-
-# below is the process for using the pygame_gui
 manager = pygame_gui.UIManager((1300, 900))
 
 def set_difficulty(value, difficulty):
@@ -98,7 +97,7 @@ def main_menu():
                 main_menu_running = False
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == play_button:
-                    start_the_game("Jimmy P", ["TC Tyler", "Scrappy", "Jimmy P", "Tommy Tanks"])
+                    start_the_game("Jimmy P", ["TC Tyler", "Scrappy", "Jimmy P", "Tommy Tanks"], player)
                     print("At least this worked")
                 if event.ui_element == quit_button:
                     main_menu_running = False
@@ -111,7 +110,7 @@ def main_menu():
         pygame.display.update()
 
 
-def go_to_town(game_surface, contract_list, ranking_list_window, action_rect, current_ranks, current_rank_rects, toolbar):
+def go_to_town(game_surface, contract_list, ranking_list_window, action_rect, current_ranks, current_rank_rects, toolbar, player):
     screen_width, screen_height = 1300, 900
     town_manager = pygame_gui.UIManager((screen_width, screen_height))
     town_toolbar = build_toolbar(toolbar, town_manager)
@@ -170,28 +169,17 @@ def go_to_town(game_surface, contract_list, ranking_list_window, action_rect, cu
                                                      container=details_window, anchors={'center': 'bottom'})
 
 
-        return contract_manager
+        return contract_manager, contract, accept_button
 
-        '''
-        new_menu.add.label("Offered by: " + contract.contractor.name + " The " + contract.contractor.profession)
-        new_menu.add.label("Needed: ")
-        for need in contract.needed:
-            new_menu.add.label(str(need[1]) + " " + need[0])
-        new_menu.add.label("Reward: ")
-
-        for reward in contract.reward:
-            new_menu.add.label(str(reward[1]) + " " + reward[0])
-
-        new_menu.add.label(contract.description, wordwrap=True)
-        new_menu.add.button("Accept", add_contract_to_player, contract)
-        new_menu.draw(game_surface)
-        pygame.display.flip()
-        '''
-    def contracts(toolbar):
-
+    def accept_contract(player, contract):
+        player.contract_list.append(contract)
+        return player
+    def contracts(toolbar, player):
+        accept_button = 0
         looking_at_contracts = True
         contract_manager = pygame_gui.UIManager((1300, 900))
         toolbar = build_toolbar(toolbar, contract_manager)
+        selected_contract = 0
         #def back_out(button):
         #    #break
         #    #button.set_onreturn(False)
@@ -230,9 +218,14 @@ def go_to_town(game_surface, contract_list, ranking_list_window, action_rect, cu
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:
                     for contract in contract_list:
                         if event.ui_element.text == contract.title:
-                            contract_manager = display_details(contract, contract_manager)
+                            contract_manager, selected_contract, accept_button = display_details(contract, contract_manager)
+
                     if event.ui_element == back_out_button:
                         looking_at_contracts = False
+
+                    if event.ui_element == accept_button:
+                        player = accept_contract(player, selected_contract)
+
                 contract_manager.process_events(event)
 
             contract_manager.update(time_delta)
@@ -287,7 +280,7 @@ def go_to_town(game_surface, contract_list, ranking_list_window, action_rect, cu
                 if event.ui_element == back_to_map_button:
                     currently_townin = False
                 if event.ui_element == contracts_button:
-                    contracts(toolbar)
+                    contracts(toolbar, player)
                 if event.ui_element == hire_button:
                     print('hire_button pressed')
                 if event.ui_element == shop_button:
@@ -352,21 +345,6 @@ def setup_scenarios(player, surface): #Creates a complete scenario list for all 
     scen_list = junker.create_Scenarios(player, surface)
     return scen_list
 
-def look_at_contracts():
-    for contract in contract_list:
-        contract_menu.add.button(contract.title, display_details, contract)
-    contract_menu.add.button("Back", back_out)
-
-    while looking_at_contracts:  # CREATING THE CONTRACT DISPLAY SCREEN
-        clock.tick(60)
-        events = pygame.event.get()
-        for event in events:
-            if event.type == pygame.QUIT:
-                looking_at_contracts = False
-        contract_menu.draw(game_surface)
-        contract_menu.update(events)
-        pygame.display.flip()
-
 def build_toolbar(toolbar, cur_manager):
     toolbar = pygame_gui.elements.UIWindow(toolbar_rect, cur_manager, window_display_title="Toolbar",draggable=False)
     inventory_button_rect = pygame.Rect(0, 0, 200, toolbar_rect.height-59)
@@ -379,13 +357,11 @@ def build_toolbar(toolbar, cur_manager):
     char_button = pygame_gui.elements.UIButton(char_button_rect,"Character",manager=cur_manager,container=toolbar,
                                                     tool_tip_text="Look at your stats")
     return toolbar, cur_manager
-def start_the_game(player_name,ranked_list):
+def start_the_game(player_name, ranked_list, player):
     turn_start = True
     run_round = True
     turn_num = 1
     weather = "Sunny"
-    global player
-    player = Player()
     player.name = player_name
     game_surface = pygame.display.set_mode((screen_width, screen_height))
     scenario_list = setup_scenarios(player, game_surface)
@@ -462,7 +438,7 @@ def start_the_game(player_name,ranked_list):
                 start_menu = False
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == go_to_town_button:
-                    go_to_town(game_surface, contract_list, ranking_list_window, action_rect, current_ranks, current_rank_rects, toolbar)
+                    go_to_town(game_surface, contract_list, ranking_list_window, action_rect, current_ranks, current_rank_rects, toolbar, player)
                 if event.ui_element == junkin_button:
                     junkin(game_surface, next_scen, player)
                 if event.ui_element == hit_the_road_button:
