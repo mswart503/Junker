@@ -164,9 +164,12 @@ def go_to_town(game_surface, contract_list, ranking_list_window, action_rect, cu
             count -= 1
             description_rect.y = description_rect.y + description_rect.height
 
-        accept_rect = pygame.Rect(0, details_window_rect.height-150, 200, 100)
+        accept_rect = pygame.Rect(25, details_window_rect.height-175, 200, 100)
         accept_button = pygame_gui.elements.UIButton(accept_rect, "Accept Contract", manager=contract_manager,
-                                                     container=details_window, anchors={'center': 'bottom'})
+                                                     container=details_window)
+        submit_rect = pygame.Rect(details_window_rect.width-250, accept_rect.top, 200, 100)
+        submit_button = pygame_gui.elements.UIButton(submit_rect, "Submit Contract", manager=contract_manager,
+                                                     container=details_window)
 
 
         return contract_manager, contract, accept_button
