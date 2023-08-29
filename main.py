@@ -77,19 +77,7 @@ def main_menu():
                                                manager=manager, container=menu_window,
                                                anchors={'center': 'center'}, object_id='quit_button')
 
-    '''
-    # Old code with Pygame_menu functionality.
-    start_theme = menu_theme.copy()
-    start_theme.widget_alignment = pygame_menu.locals.ALIGN_CENTER
-    menu = pygame_menu.Menu('Welcome', 400, 300,
-                            theme=start_theme)
 
-    test_name = menu.add.text_input('Name :', default=' Jimmy P')
-    # menu.add.selector('Difficulty :', [('Hard', 1), ('Easy', 2)], onchange=set_difficulty)
-    menu.add.button('Play', start_the_game, test_name.get_value())
-    menu.add.button('Quit', pygame_menu.events.EXIT)
-    menu.mainloop(surface)
-    '''
     while main_menu_running:
         time_delta = clock.tick(60)/1000.0
         for event in pygame.event.get():
@@ -304,34 +292,37 @@ def hit_the_road():
     pass
 
 def junkin(game_surface, scenario, player):
-    currently_junkin = False
+    currently_junkin = True
     choosing_junk_loc = True
     scen_menu = scenario.menu
-    junk_map = JunkinMap(player, game_surface)
+    junk_map = JunkinMap(player, game_surface, 5, 5)
+    junkin_manager = pygame_gui.UIManager((screen_width, screen_height))
+    junkin_manager = junk_map.draw_map(junkin_manager, surface)
    # for buttons in scenario.menu_buttons:
 
-    while choosing_junk_loc:
-        clock.tick(60)
-        events = pygame.event.get()
-        for event in events:
-            if event.type == pygame.QUIT:
-                choosing_junk_loc = False
-        junk_map.map.draw(game_surface)
-        junk_map.map.update(events)
-        pygame.display.flip()
+#    while choosing_junk_loc:
+#        clock.tick(60)
+#        events = pygame.event.get()
+#        for event in events:
+#            if event.type == pygame.QUIT:
+#                choosing_junk_loc = False
+#        junk_map.map.draw(game_surface)
+#        junk_map.map.update(events)
+#        pygame.display.flip()
 
     while currently_junkin:
-        clock.tick(60)
+        time_delta = clock.tick(60) / 1000.0
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
                 currently_junkin = False
+            junkin_manager.process_events(event)
+        junkin_manager.update(time_delta)
         game_surface.fill((0, 0, 0))
-        game_surface.blit(wasteland, (0, 0))
-        scen_menu.draw(game_surface)
-        scen_menu.update(events)
-        pygame.display.flip()
+        #game_surface.blit(wasteland, (game_surface.get_width()-wasteland.get_width(), 0))
+        junkin_manager.draw_ui(game_surface)
 
+        pygame.display.update()
 
 def scenario_set(scenario_list):
     scen_numbers = 1
