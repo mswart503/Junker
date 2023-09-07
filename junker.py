@@ -115,6 +115,7 @@ class JunkinMap:
         self.map_width = map_width
         self.map_height = map_height
         self.area_list = []
+        self.map_dict = {}
 
 
     def draw_map(self, manager, surface):
@@ -128,13 +129,14 @@ class JunkinMap:
         while cur_width > 0:
             while cur_height > 0:
                 draw_rect = pygame.Rect(current_rect.left+(buffer+area_width)*cur_height, current_rect.top+(buffer+area_height)*cur_width, area_width, area_height)
-                self.area_list.append(pygame_gui.elements.UIButton(draw_rect, "Unknown", manager=manager, container=map_window))
-                cur_height-=1
-            cur_width-=1
+                cur_button = pygame_gui.elements.UIButton(draw_rect, "Unknown", manager=manager, container=map_window)
+                self.area_list.append(cur_button)
+                self.map_dict.update({(cur_width, cur_height): cur_button})
+                cur_height -= 1
+            cur_width -= 1
             cur_height = self.map_height
         return manager
-    def quarry(self):
-        pass
+
 
 
 def create_Scenarios(player, surface):

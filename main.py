@@ -86,7 +86,6 @@ def main_menu():
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == play_button:
                     start_the_game("Jimmy P", ["TC Tyler", "Scrappy", "Jimmy P", "Tommy Tanks"], player)
-                    print("At least this worked")
                 if event.ui_element == quit_button:
                     main_menu_running = False
 
@@ -298,17 +297,12 @@ def junkin(game_surface, scenario, player):
     junk_map = JunkinMap(player, game_surface, 5, 5)
     junkin_manager = pygame_gui.UIManager((screen_width, screen_height))
     junkin_manager = junk_map.draw_map(junkin_manager, surface)
-   # for buttons in scenario.menu_buttons:
+    ####NEXT
+    #Right now I have coordinates for every junkin area under map_dict, I need to use
+    #this to create a line of areas to choose from as your starting area. They need
+    #to be differently colored and when you click them you choose to stake a claim
+    #then the remaining go back to "Unknown" and that one you can start interacting with
 
-#    while choosing_junk_loc:
-#        clock.tick(60)
-#        events = pygame.event.get()
-#        for event in events:
-#            if event.type == pygame.QUIT:
-#                choosing_junk_loc = False
-#        junk_map.map.draw(game_surface)
-#        junk_map.map.update(events)
-#        pygame.display.flip()
 
     while currently_junkin:
         time_delta = clock.tick(60) / 1000.0
@@ -388,8 +382,6 @@ def start_the_game(player_name, ranked_list, player):
     name4_rect = pygame.Rect(0, name3_rect.y+20, screen_width-map_width-50, 300)
     current_rank_rects = [name1_rect.copy(), name2_rect.copy(), name3_rect.copy(), name4_rect.copy()]
     rank_width, rank_height, action_height = screen_width-map_width, 300, 400
-    #play_rect = pygame.Rect(0, -20, 100, 20)
-    #quit_rect = pygame.Rect(0, 20, 100, 20)
     rank_rect = pygame.Rect(0, 0, rank_width, rank_height)
     action_rect = pygame.Rect(0, rank_rect.y+rank_height, rank_width, action_height)
     button_width = 200
@@ -447,73 +439,6 @@ def start_the_game(player_name, ranked_list, player):
 
         pygame.display.update()
 
-    '''
-    play_button = pygame_gui.elements.UIButton(relative_rect=play_rect, text="Play",
-                                               manager=manager, container=menu_window,
-                                               anchors={'center': 'center'}, object_id='#play_button')
-    quit_button = pygame_gui.elements.UIButton(relative_rect=quit_rect, text="Quit",
-                                               manager=manager, container=menu_window,
-                                               anchors={'center': 'center'}, object_id='quit_button')
-    '''
-    '''
-    ranking_list = pygame_menu.Menu('Junker Legacy', screen_width-map_width, 300,
-                                theme=menu_theme)
-    ranking_list.set_absolute_position(0, 0)
-    ranked_names = 'TC Tyler\n' \
-                   'Scrappy\n'\
-                   '%s\n' \
-                   'Tommy Tanks\n' % player_name
-    ranking_list.add.label("Rankings", max_char=-1, font_size=30)
-    ranking_list.add.label(ranked_names, max_char=-1, font_size=20)
-    '''
-
-    '''
-    actions_list = pygame_menu.Menu("Actions", ranking_list.get_width(), map_height-ranking_list.get_height(), theme=menu_theme)
-    actions_list.set_absolute_position(0, ranking_list.get_height())
-    actions_list.add.button("Go to Town", go_to_town, game_surface, current_contracts)
-    actions_list.add.button("Hit the road", hit_the_road, game_surface)
-    actions_list.add.button("Get Junkin' & end turn", junkin, game_surface, next_scen, player)
-
-    player_summary = pygame_menu.Menu(player_name, game_surface.get_width(), game_surface.get_height()-main_map.get_height(), columns=3, rows=2)
-    #player_summary.add.button("Inventory", look_at_inventory)
-    #player_summary.add.button("Contracts", look_at_contracts)
-    #player_summary.add.button("Workers", look_at_workers)
-    #.add.frame_h(game_surface.get_width()/2,player_summary.get_height()-20)
-
-
-
-
-
-    #card_test = junker.Card("Go to Town", "Perform 1 action in the town you're in",card_width, card_height, game_surface.get_width()-map_width,0)
-
-    while run_round:
-        junkin_options = []
-        time_delta = clock.tick(60)/1000.0
-        events = pygame.event.get()
-        for event in events:
-            if event.type == pygame.QUIT:
-                run_round = False
-        game_surface.fill((0, 0, 0))
-        game_surface.blit(main_map, (game_surface.get_width()-map_width, 0))
-        ranking_list.update(events)
-        ranking_list.draw(game_surface)
-        actions_list.update(events)
-        actions_list.draw(game_surface)
-        #card_test.draw(game_surface)
-        pygame.display.update()
-
-    pass
-'''
-
 
 main_menu()
 
-#while run:
-#    menu.mainloop(surface)
-
-#    for event in pygame.event.get():
-#        if event.type == pygame.QUIT:
-#            run = False
-
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
