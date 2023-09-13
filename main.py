@@ -13,6 +13,7 @@ import os
 import pygame.freetype
 import random
 from junker import Scenario, Player, JunkinMap
+from pygame_gui.core import ObjectID
 
 run = True
 player = junker.Player()
@@ -294,15 +295,24 @@ def junkin(game_surface, scenario, player):
     currently_junkin = True
     choosing_junk_loc = True
     scen_menu = scenario.menu
-    junk_map = JunkinMap(player, game_surface, 5, 5)
-    junkin_manager = pygame_gui.UIManager((screen_width, screen_height))
-    junkin_manager = junk_map.draw_map(junkin_manager, surface)
+    if player.junkin_map == "":
+        player.junkin_map = JunkinMap(game_surface, 5, 5)
+        junkin_manager = pygame_gui.UIManager((screen_width, screen_height), 'Themes/option_to_select')
+        junkin_manager = player.junkin_map.create_map(junkin_manager, game_surface)
+        start_areas = [((5, 1), "start"), ((5, 2),"start"), ((5, 3),"start"), ((5, 4), "start"), ((5, 5), "start")]
+        junkin_manager = player.junkin_map.update_map(junkin_manager, game_surface, start_areas)
+    else:
+        junkin_manager = pygame_gui.UIManager((screen_width, screen_height), 'Themes/option_to_select')
+        junkin_manager = player.junkin_map.draw_map(junkin_manager, game_surface)
+
     ####NEXT
     #Right now I have coordinates for every junkin area under map_dict, I need to use
     #this to create a line of areas to choose from as your starting area. They need
     #to be differently colored and when you click them you choose to stake a claim
     #then the remaining go back to "Unknown" and that one you can start interacting with
 
+
+    # , object_id = ObjectID(object_id='#selectable')
 
     while currently_junkin:
         time_delta = clock.tick(60) / 1000.0

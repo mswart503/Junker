@@ -8,6 +8,7 @@ pygame.freetype.init()
 title_Font = pygame_menu.font.FONT_8BIT # pygame.freetype.SysFont('bahnschrift',20)
 text_Font = pygame_menu.font.FONT_MUNRO # pygame.freetype.SysFont('bahnschrift',14)
 import pygame_menu, pygame_gui
+from pygame_gui.core import ObjectID
 
 menu_theme = pygame_menu.themes.THEME_ORANGE
 menu_theme.title_bar_style = pygame_menu.widgets.MENUBAR_STYLE_UNDERLINE
@@ -52,6 +53,7 @@ class Player:
         self.wood = 0
         self.scrap = 0
         self.contract_list = []
+        self.junkin_map = ""
 
 class Character:
     def __init__(self, name, profession, trust=0):
@@ -106,7 +108,7 @@ class Scenario:
 
 
 class JunkinMap:
-    def __init__(self, player, surface, map_width, map_height):
+    def __init__(self, surface, map_width, map_height):
         # self.map = pygame_menu.Menu("Where do you want to search?", surface.get_width(), surface.get_height(), columns=2, rows=2)
         # self.map.add.button("The Quarry", self.quarry)
         # self.map.add.button("The Junkyard", self.quarry)
@@ -116,9 +118,10 @@ class JunkinMap:
         self.map_height = map_height
         self.area_list = []
         self.map_dict = {}
+        self.map_created = False
 
 
-    def draw_map(self, manager, surface):
+    def create_map(self, manager, surface):
         map_rect = pygame.Rect(0, 0, surface.get_width(), surface.get_height() - 200)
         map_window = pygame_gui.elements.UIWindow(map_rect, manager=manager)
         buffer = 10
@@ -126,17 +129,47 @@ class JunkinMap:
         area_height = (map_rect.height - buffer * (self.map_height + 7)) / self.map_height
         current_rect = pygame.Rect(map_rect.left-area_width, map_rect.top-area_height, area_width, area_height)
         cur_width, cur_height = self.map_width, self.map_height
+        grid_object_id = ObjectID(class_id="@friendly_button", object_id="#normal")
         while cur_width > 0:
             while cur_height > 0:
-                draw_rect = pygame.Rect(current_rect.left+(buffer+area_width)*cur_height, current_rect.top+(buffer+area_height)*cur_width, area_width, area_height)
+                draw_rect = pygame.Rect(current_rect.left+(buffer+area_width)*cur_height, current_rect.top+(buffer+area_height)*cur_width,
+                                        area_width, area_height)
                 cur_button = pygame_gui.elements.UIButton(draw_rect, "Unknown", manager=manager, container=map_window)
+                cur_button.object_id = grid_object_id
                 self.area_list.append(cur_button)
                 self.map_dict.update({(cur_width, cur_height): cur_button})
                 cur_height -= 1
             cur_width -= 1
             cur_height = self.map_height
+        self.map_created = True
         return manager
 
+    def update_map(self, manager, surface, areas_to_update):
+        if not self.map_created:
+            pass
+        else:
+            for area in areas_to_update:
+                if area[1] == "start":
+                    self.map_dict[area[0]].object_id = ObjectID(class_id="@friendly_button", object_id='#selectable')
+                    self.map_dict[area[0]].text = "Start Here"
+            return self.draw_map(manager, surface)
+
+    def draw_map(self, manager, surface):
+        map_rect = pygame.Rect(0, 0, surface.get_width(), surface.get_height() - 200)
+        map_window = pygame_gui.elements.UIWindow(map_rect, manager=manager)
+        buffer = 10
+        area_width = (map_rect.width - buffer * (self.map_width + 4)) / self.map_width
+        area_height = (map_rect.height - buffer * (self.map_height + 7)) / self.map_height
+
+        current_rect = pygame.Rect(map_rect.left-area_width, map_rect.top-area_height, area_width, area_height)
+        for area in self.map_dict:
+            draw_rect = pygame.Rect(current_rect.left + (buffer + area_width) * area[0],
+                                    current_rect.top + (buffer + area_height) * area[1], area_width, area_height)
+            cur_button = pygame_gui.elements.UIButton(draw_rect, self.map_dict[area].text, manager=manager, container=map_window, object_id=self.map_dict[area].object_id)
+
+        return manager
+    def choose_start(self, manager, surface):
+        pass
 
 
 def create_Scenarios(player, surface):
